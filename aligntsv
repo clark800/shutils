@@ -3,6 +3,24 @@
 # aligns tsv columns by inserting spaces so that each column has the same width
 # constraint: fields must not contain consecutive spaces
 
-column -s $'\t' -t "$1" | sed 's/[[:space:]]*$//' |
-    sed 's/\( *\)  /\1\t/g' > "$1.tmp"
-mv "$1.tmp" "$1"
+retab() {
+    sed 's/[[:space:]]*$//' | sed 's/\( *\)  /\1\t/g'
+}
+
+if [ "$#" -eq 0 ]; then
+    column -s $'\t' -t | retab
+else
+    for file in "$@"; do
+        if [ -r "$file" ]; then
+            column -s $'\t' -t "$file" > "$file.tmp"
+            if [ "$?" -eq 0 ] && [ -s "$file.tmp" ]; then
+                cat "$file.tmp" | retab > "$file"
+            elif [ -s "$file" ]; then
+                echo "$0: $file: failed" >&2
+            fi
+            rm "$file.tmp"
+        else
+            echo "$0: $file: file does not exist or is not readable" >&2
+        fi
+    done
+fi
