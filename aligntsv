@@ -3,16 +3,22 @@
 # aligns tsv columns by inserting spaces so that each column has the same width
 # constraint: fields must not contain consecutive spaces
 
+tab="$(printf '\t')"
+
+squash() {
+    sed 's/ *\t/\t/g' | sed 's/\t */\t/g'
+}
+
 retab() {
     sed 's/[[:space:]]*$//' | sed 's/\( *\)  /\1\t/g'
 }
 
 if [ "$#" -eq 0 ]; then
-    column -s $'\t' -t | retab
+    squash | column -s "$tab" -t | retab
 else
     for file in "$@"; do
         if [ -r "$file" ]; then
-            column -s $'\t' -t "$file" > "$file.tmp"
+            cat "$file" | squash | column -s "$tab" -t > "$file.tmp"
             if [ "$?" -eq 0 ] && [ -s "$file.tmp" ]; then
                 cat "$file.tmp" | retab > "$file"
             elif [ -s "$file" ]; then
