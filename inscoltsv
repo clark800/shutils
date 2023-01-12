@@ -1,0 +1,18 @@
+#!/bin/sh
+
+inscol() {
+    awk -v col="$1" -v val="-" \
+        'BEGIN{FS=OFS="\t"} {$col = val FS $col} {print}'
+}
+
+if [ "$#" -eq 0 ]; then
+    echo "usage: $0 <column> [<file>...]" && exit 1
+elif [ "$#" -eq 1 ]; then
+    inscol "$1"
+else
+    col="$1"
+    shift
+    for file in "$@"; do
+        cat "$file" | inscol "$col" > "$file.tmp" && mv "$file.tmp" "$file"
+    done
+fi
