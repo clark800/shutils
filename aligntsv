@@ -6,7 +6,7 @@
 tab="$(printf '\t')"
 
 squash() {
-    sed 's/ *\t/\t/g' | sed 's/\t */\t/g'
+    sed 's/[[:space:]]*$//' | sed '$N' | sed 's/ *\t/\t/g' | sed 's/\t */\t/g'
 }
 
 retab() {
